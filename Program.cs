@@ -6,7 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<QuotesDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 34))));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(9, 3, 0)))
+);
 
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
