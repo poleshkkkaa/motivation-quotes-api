@@ -1,9 +1,0 @@
-build:
-  builder: "NIXPACKS"
-  nixpacksPlan:
-    providers:
-      - dotnet
-    buildCommands:
-      - dotnet restore --configfile nuget.config
-      - dotnet publish -c Release -o out --no-restore
-    startCommand: "dotnet out/MotivationQuotesApi.dll"
