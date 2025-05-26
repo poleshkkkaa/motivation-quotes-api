@@ -5,5 +5,5 @@ build:
       - dotnet
     buildCommands:
       - dotnet restore MotivationQuotesApi.csproj --configfile nuget.config
-      - dotnet publish MotivationQuotesApi.csproj -c Release -o out --no-restore
+      - dotnet publish MotivationQuotesApi.csproj -c Release -o out
     startCommand: "dotnet out/MotivationQuotesApi.dll"
