@@ -1,0 +1,9 @@
+build:
+  builder: "NIXPACKS"
+  nixpacksPlan:
+    providers:
+      - dotnet
+    buildCommands:
+      - dotnet restore MotivationQuotesApi.csproj
+      - dotnet publish MotivationQuotesApi.csproj -c Release -o out
+    startCommand: "dotnet out/MotivationQuotesApi.dll"
