@@ -24,4 +24,10 @@ app.MapControllers();
 
 app.Urls.Add("http://*:8080");
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<QuotesDbContext>();
+    db.Database.Migrate(); 
+}
+
 app.Run();
