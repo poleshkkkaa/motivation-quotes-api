@@ -28,9 +28,6 @@ namespace MotivationQuotesApi.Migrations
                     b.Property<long>("ChatId")
                         .HasColumnType("bigint");
 
-                    b.Property<TimeSpan>("PreferredTime")
-                        .HasColumnType("time(6)");
-
                     b.HasKey("Id");
 
                     b.ToTable("DailySubscribers");
@@ -103,9 +100,6 @@ namespace MotivationQuotesApi.Migrations
                     b.Property<string>("Query")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime>("SearchDate")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
