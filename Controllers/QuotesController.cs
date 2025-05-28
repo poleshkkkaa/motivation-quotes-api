@@ -282,18 +282,18 @@ namespace MotivationQuotesAPI.Controllers
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "Підписка оформлена успішно!" });
         }
-         //відписка від щодених цитат
+
+        //відписка від щодених цитат
         [HttpPost("daily/unsubscribe")]
         public async Task<IActionResult> UnsubscribeFromDaily([FromQuery] long chatId)
         {
             var subscriber = await _dbContext.DailySubscribers.FirstOrDefaultAsync(s => s.ChatId == chatId);
             if (subscriber == null)
-                return NotFound(new { message = "Вас не знайдено в підписці." });
+                return NotFound(new { message = "Вас не знайдено в списку підписників." });
 
             _dbContext.DailySubscribers.Remove(subscriber);
             await _dbContext.SaveChangesAsync();
-
-            return Ok(new { message = "Ви успішно відписалися від щоденних цитат." });
+            return Ok(new { message = "Ви успішно відписалися." });
         }
 
         [HttpGet("rating/{quoteId}")]
