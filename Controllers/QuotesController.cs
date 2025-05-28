@@ -266,7 +266,7 @@ namespace MotivationQuotesAPI.Controllers
         }
 
         // підписка на щодену цитату
-        [HttpPost("daily/subscribe")]
+        [HttpPost("daily")]
         public async Task<IActionResult> SubscribeToDaily([FromQuery] long chatId, [FromQuery] TimeSpan time)
         {
             var exists = await _dbContext.DailySubscribers.AnyAsync(s => s.ChatId == chatId);
@@ -284,7 +284,7 @@ namespace MotivationQuotesAPI.Controllers
         }
 
         //відписка від щодених цитат
-        [HttpPost("daily/unsubscribe")]
+        [HttpPost("unsubscribe")]
         public async Task<IActionResult> UnsubscribeFromDaily([FromQuery] long chatId)
         {
             var subscriber = await _dbContext.DailySubscribers.FirstOrDefaultAsync(s => s.ChatId == chatId);
