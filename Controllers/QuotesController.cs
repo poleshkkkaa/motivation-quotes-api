@@ -104,7 +104,6 @@ namespace MotivationQuotesAPI.Controllers
             }
         }
 
-
         // Додати цитату до улюблених
         [HttpPost("favorites/add")]
         public async Task<IActionResult> AddToFavorites([FromBody] Quote quote)
@@ -266,45 +265,35 @@ namespace MotivationQuotesAPI.Controllers
             return Ok(top);
         }
 
+        // підписка на щодену цитату
         [HttpPost("daily/subscribe")]
-        public async Task<IActionResult> SubscribeToDaily([FromQuery] long chatId)
+        public async Task<IActionResult> SubscribeToDaily([FromQuery] long chatId, [FromQuery] TimeSpan time)
         {
             var exists = await _dbContext.DailySubscribers.AnyAsync(s => s.ChatId == chatId);
             if (exists)
                 return Conflict(new { message = "Ви вже підписані." });
 
-            _dbContext.DailySubscribers.Add(new DailySubscriber { ChatId = chatId });
+            _dbContext.DailySubscribers.Add(new DailySubscriber
+            {
+                ChatId = chatId,
+                PreferredTime = time
+            });
+
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "Підписка оформлена успішно!" });
         }
-
-
-        [HttpPost("react/{quoteId}")]
-        public async Task<IActionResult> ReactToQuote(int quoteId, [FromQuery] bool isLike, [FromQuery] long userId)
+         //відписка від щодених цитат
+        [HttpPost("daily/unsubscribe")]
+        public async Task<IActionResult> UnsubscribeFromDaily([FromQuery] long chatId)
         {
-            var quote = await _dbContext.Quotes.FindAsync(quoteId);
-            if (quote == null)
-                return NotFound("Цитату не знайдено.");
+            var subscriber = await _dbContext.DailySubscribers.FirstOrDefaultAsync(s => s.ChatId == chatId);
+            if (subscriber == null)
+                return NotFound(new { message = "Вас не знайдено в підписці." });
 
-            var existing = await _dbContext.QuoteReactions
-                .FirstOrDefaultAsync(r => r.QuoteId == quoteId && r.UserId == userId);
-
-            if (existing != null)
-            {
-                existing.IsLike = isLike; // оновити реакцію
-            }
-            else
-            {
-                _dbContext.QuoteReactions.Add(new QuoteReaction
-                {
-                    QuoteId = quoteId,
-                    UserId = userId,
-                    IsLike = isLike
-                });
-            }
-
+            _dbContext.DailySubscribers.Remove(subscriber);
             await _dbContext.SaveChangesAsync();
-            return Ok(new { message = isLike ? "👍 Лайк" : "👎 Дизлайк" });
+
+            return Ok(new { message = "Ви успішно відписалися від щоденних цитат." });
         }
 
         [HttpGet("rating/{quoteId}")]
