@@ -287,13 +287,21 @@ namespace MotivationQuotesAPI.Controllers
         [HttpPost("unsubscribe")]
         public async Task<IActionResult> UnsubscribeFromDaily([FromQuery] long chatId)
         {
-            var subscriber = await _dbContext.DailySubscribers.FirstOrDefaultAsync(s => s.ChatId == chatId);
-            if (subscriber == null)
-                return NotFound(new { message = "Вас не знайдено в списку підписників." });
+            try
+            {
+                var subscriber = await _dbContext.DailySubscribers.FirstOrDefaultAsync(s => s.ChatId == chatId);
+                if (subscriber == null)
+                    return NotFound(new { message = "Вас не знайдено в списку підписників." });
 
-            _dbContext.DailySubscribers.Remove(subscriber);
-            await _dbContext.SaveChangesAsync();
-            return Ok(new { message = "Ви успішно відписалися." });
+                _dbContext.DailySubscribers.Remove(subscriber);
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(new { message = "Ви успішно відписалися." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Server error: {ex.Message}" });
+            }
         }
 
         [HttpGet("rating/{quoteId}")]
