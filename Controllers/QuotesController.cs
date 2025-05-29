@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.IO;
+using DotNetEnv;
+using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
+
 namespace MotivationQuotesAPI.Controllers
 {
     [Route("quotes")]
@@ -302,6 +306,41 @@ namespace MotivationQuotesAPI.Controllers
             {
                 return StatusCode(500, new { message = $"Server error: {ex.Message}" });
             }
+        }
+
+        [HttpPost("quotes/daily/send")]
+        public async Task<IActionResult> SendDailyQuotes([FromQuery] string time)
+        {
+            var subscribers = await _dbContext.DailySubscribers.Where(s => s.PreferredTime == time).ToListAsync();
+
+            if (!subscribers.Any())
+                return Ok("👥 Немає підписників на цей час.");
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync("https://motivation-quotes-api-production.up.railway.app/quotes/random");
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "❌ Не вдалося отримати цитату.");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var quote = JsonSerializer.Deserialize<ApiQuote>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (quote == null)
+                return StatusCode(500, "⚠️ Невірні дані цитати.");
+
+            var botToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
+            if (string.IsNullOrEmpty(botToken))
+                return StatusCode(500, "⚠️ BOT_TOKEN не встановлений в змінних середовища.");
+
+            var botClient = new TelegramBotClient(botToken);
+
+            foreach (var user in subscribers)
+            {
+                string msg = $"💬 \"{quote.QuoteText}\"\n— {quote.Author}";
+                await botClient.SendTextMessageAsync(user.ChatId, msg);
+            }
+
+            return Ok("✅ Цитати надіслано всім підписникам.");
         }
 
         [HttpGet("rating/{quoteId}")]
