@@ -11,15 +11,14 @@ using MotivationQuotesAPI.Models;
 namespace MotivationQuotesApi.Migrations
 {
     [DbContext(typeof(QuotesDbContext))]
-    [Migration("20250526203018_InitialCreate")]
+    [Migration("20250529185643_InitialCreate")]
     partial class InitialCreate
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "6.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MotivationQuotesAPI.Models.DailySubscriber", b =>
@@ -30,6 +29,9 @@ namespace MotivationQuotesApi.Migrations
 
                     b.Property<long>("ChatId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("PreferredTime")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 

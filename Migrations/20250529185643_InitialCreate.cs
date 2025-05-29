@@ -6,10 +6,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MotivationQuotesApi.Migrations
 {
-    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
@@ -21,7 +19,9 @@ namespace MotivationQuotesApi.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ChatId = table.Column<long>(type: "bigint", nullable: false)
+                    ChatId = table.Column<long>(type: "bigint", nullable: false),
+                    PreferredTime = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -105,7 +105,6 @@ namespace MotivationQuotesApi.Migrations
                 column: "QuoteId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

@@ -276,7 +276,7 @@ namespace MotivationQuotesAPI.Controllers
             _dbContext.DailySubscribers.Add(new DailySubscriber
             {
                 ChatId = chatId,
-                PreferredTime = time
+                PreferredTime = time.ToString(@"hh\:mm")
             });
 
             await _dbContext.SaveChangesAsync();

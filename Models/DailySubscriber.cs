@@ -4,7 +4,8 @@
     {
         public int Id { get; set; }
         public long ChatId { get; set; }
-        public TimeSpan PreferredTime { get; set; } 
+        public string? PreferredTime { get; set; }
+
     }
 
 }
