@@ -131,106 +131,30 @@
         }
       }
     },
-    "/quotes/top": {
-      "get": {
-        "tags": [
-          "Quotes"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/quotes/daily": {
+    "/quotes/react": {
       "post": {
         "tags": [
           "Quotes"
         ],
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "time",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/TimeSpan"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/quotes/unsubscribe": {
-      "post": {
-        "tags": [
-          "Quotes"
-        ],
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/quotes/daily/send": {
-      "post": {
-        "tags": [
-          "Quotes"
-        ],
-        "parameters": [
-          {
-            "name": "time",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/quotes/rating/{quoteId}": {
-      "get": {
-        "tags": [
-          "Quotes"
-        ],
-        "parameters": [
-          {
-            "name": "quoteId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Success"
@@ -258,61 +182,32 @@
           },
           "isFavorite": {
             "type": "boolean"
+          },
+          "likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dislikes": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
       },
-      "TimeSpan": {
+      "ReactionRequest": {
         "type": "object",
         "properties": {
-          "ticks": {
+          "quoteId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
             "type": "integer",
             "format": "int64"
           },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "hours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "milliseconds": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minutes": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seconds": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalDays": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
-          },
-          "totalHours": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
-          },
-          "totalMilliseconds": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
-          },
-          "totalMinutes": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
-          },
-          "totalSeconds": {
-            "type": "number",
-            "format": "double",
-            "readOnly": true
+          "reactionType": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -245,45 +245,42 @@ namespace MotivationQuotesAPI.Controllers
             return File(imageBytes, contentType);
         }
 
-        [HttpPost("quotes/react")]
+        [HttpPost("react")]
         public async Task<IActionResult> ReactToQuote([FromBody] ReactionRequest request)
         {
             var quote = await _dbContext.Quotes.FindAsync(request.QuoteId);
-            if (quote == null)
-                return NotFound("❌ Цитата не знайдена.");
+            if (quote == null) return NotFound("Цитату не знайдено.");
 
-            var existingReaction = await _dbContext.QuoteReactions
+            var existing = await _dbContext.QuoteReactions
                 .FirstOrDefaultAsync(r => r.QuoteId == request.QuoteId && r.UserId == request.UserId);
 
-            if (existingReaction != null)
+            if (existing != null)
             {
-                if (existingReaction.ReactionType == request.ReactionType)
-                {
-                    return BadRequest("⚠️ Ви вже поставили цю реакцію.");
-                }
+                if (existing.ReactionType == request.ReactionType)
+                    return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes }); 
 
-                if (existingReaction.ReactionType == "like") quote.Likes--;
-                if (existingReaction.ReactionType == "dislike") quote.Dislikes--;
+                if (existing.ReactionType == "like") quote.Likes--;
+                else if (existing.ReactionType == "dislike") quote.Dislikes--;
 
-                existingReaction.ReactionType = request.ReactionType;
-            }
-            else
-            {
-                _dbContext.QuoteReactions.Add(new QuoteReaction
-                {
-                    QuoteId = request.QuoteId,
-                    UserId = request.UserId,
-                    ReactionType = request.ReactionType
-                });
+                _dbContext.QuoteReactions.Remove(existing);
             }
 
-            if (request.ReactionType == "like") quote.Likes++;
-            if (request.ReactionType == "dislike") quote.Dislikes++;
+            var reaction = new QuoteReaction
+            {
+                QuoteId = request.QuoteId,
+                UserId = request.UserId,
+                ReactionType = request.ReactionType
+            };
 
+            if (reaction.ReactionType == "like") quote.Likes++;
+            else if (reaction.ReactionType == "dislike") quote.Dislikes++;
+
+            _dbContext.QuoteReactions.Add(reaction);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new { quote.Likes, quote.Dislikes });
+            return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
+
 
 
 
