@@ -278,15 +278,18 @@ namespace MotivationQuotesAPI.Controllers
             if (exists)
                 return Conflict(new { message = "Ви вже підписані." });
 
+            var timeWithSeconds = new TimeSpan(time.Hours, time.Minutes, 0);
+
             _dbContext.DailySubscribers.Add(new DailySubscriber
             {
                 ChatId = chatId,
-                PreferredTime = time
+                PreferredTime = timeWithSeconds
             });
 
             await _dbContext.SaveChangesAsync();
-            return Ok(new { message = "Підписка оформлена успішно!" });
+            return Ok(new { message = $"Підписка оформлена на {timeWithSeconds:hh\\:mm\\:ss}" });
         }
+
 
         //відписка від щодених цитат
         [HttpPost("unsubscribe")]
