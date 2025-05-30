@@ -280,7 +280,7 @@ namespace MotivationQuotesAPI.Controllers
             _dbContext.DailySubscribers.Add(new DailySubscriber
             {
                 ChatId = chatId,
-                PreferredTime = time.ToString(@"hh\:mm")
+                PreferredTime = time.ToString(@"HH\:mm")
             });
 
             await _dbContext.SaveChangesAsync();
