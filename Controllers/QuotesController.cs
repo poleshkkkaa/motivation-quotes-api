@@ -314,9 +314,12 @@ namespace MotivationQuotesAPI.Controllers
         {
             Console.WriteLine($"⏰ Час запиту: {time}");
 
-            var parsedTime = TimeSpan.ParseExact(time, "HH:mm", CultureInfo.InvariantCulture);
+            if (!TimeSpan.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, out var parsedTime))
+                return BadRequest("❌ Неправильний формат часу");
 
-            var subscribers = await _dbContext.DailySubscribers.Where(s => s.PreferredTime == parsedTime).ToListAsync();
+            var subscribers = await _dbContext.DailySubscribers
+                .Where(s => s.PreferredTime.Hours == parsedTime.Hours && s.PreferredTime.Minutes == parsedTime.Minutes)
+                .ToListAsync();
 
             Console.WriteLine($"👥 Підписників знайдено: {subscribers.Count}");
 
@@ -353,7 +356,7 @@ namespace MotivationQuotesAPI.Controllers
 
             foreach (var user in subscribers)
             {
-                string msg = $"💬 \"{quote.QuoteText}\"\n— {quote.Author}";
+                string msg = $"📩 Ваша цитата:\n\n💬 \"{quote.QuoteText}\"\n— {quote.Author}";
                 await botClient.SendTextMessageAsync(user.ChatId, msg);
             }
 
