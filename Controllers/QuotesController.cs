@@ -249,6 +249,7 @@ namespace MotivationQuotesAPI.Controllers
         public async Task<IActionResult> ReactToQuote([FromBody] ReactionRequest request)
         {
             var quote = await _dbContext.Quotes.FindAsync(request.QuoteId);
+
             if (quote == null) return NotFound("Цитату не знайдено.");
 
             var existing = await _dbContext.QuoteReactions
@@ -257,7 +258,7 @@ namespace MotivationQuotesAPI.Controllers
             if (existing != null)
             {
                 if (existing.ReactionType == request.ReactionType)
-                    return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes }); 
+                    return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
 
                 if (existing.ReactionType == "like") quote.Likes--;
                 else if (existing.ReactionType == "dislike") quote.Dislikes--;
@@ -278,9 +279,11 @@ namespace MotivationQuotesAPI.Controllers
             _dbContext.QuoteReactions.Add(reaction);
             await _dbContext.SaveChangesAsync();
 
+            Console.WriteLine($"Reaction: {request.ReactionType}, QuoteId: {request.QuoteId}, UserId: {request.UserId}");
+            Console.WriteLine($"Likes: {quote.Likes}, Dislikes: {quote.Dislikes}");
+
             return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
-
 
 
 
