@@ -194,7 +194,7 @@
         }
       }
     },
-    "/quotes/quotes/daily/send": {
+    "/quotes/daily/send": {
       "post": {
         "tags": [
           "Quotes"

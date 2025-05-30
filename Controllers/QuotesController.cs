@@ -308,7 +308,7 @@ namespace MotivationQuotesAPI.Controllers
             }
         }
 
-        [HttpPost("quotes/daily/send")]
+        [HttpPost("daily/send")]
         public async Task<IActionResult> SendDailyQuotes([FromQuery] string time)
         {
             Console.WriteLine($"⏰ Час запиту: {time}");

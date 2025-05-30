@@ -32,6 +32,22 @@
   },
   {
     "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "SendDailyQuotes",
+    "RelativePath": "quotes/daily/send",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "time",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
     "Method": "AddToFavorites",
     "RelativePath": "quotes/favorites/add",
     "HttpMethod": "POST",
@@ -100,22 +116,6 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
-    "Method": "SendDailyQuotes",
-    "RelativePath": "quotes/quotes/daily/send",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "time",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
     "ReturnTypes": []
   },
   {
