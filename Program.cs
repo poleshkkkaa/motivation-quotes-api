@@ -1,6 +1,8 @@
 ﻿using MotivationQuotesAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
