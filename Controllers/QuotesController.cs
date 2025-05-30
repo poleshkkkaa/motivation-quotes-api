@@ -314,12 +314,9 @@ namespace MotivationQuotesAPI.Controllers
         {
             Console.WriteLine($"⏰ Час запиту: {time}");
 
-            if (!TimeSpan.TryParseExact(time, "hh\\:mm", CultureInfo.InvariantCulture, out var parsedTime))
-                return BadRequest("❌ Невірний формат часу.");
+            var parsedTime = TimeSpan.ParseExact(time, "HH:mm", CultureInfo.InvariantCulture);
 
-            var subscribers = await _dbContext.DailySubscribers
-                .Where(s => s.PreferredTime == parsedTime)
-                .ToListAsync();
+            var subscribers = await _dbContext.DailySubscribers.Where(s => s.PreferredTime == parsedTime).ToListAsync();
 
             Console.WriteLine($"👥 Підписників знайдено: {subscribers.Count}");
 
