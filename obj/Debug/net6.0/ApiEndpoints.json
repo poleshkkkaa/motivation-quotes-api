@@ -1,0 +1,173 @@
+[
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetInfo",
+    "RelativePath": "quotes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "SubscribeToDaily",
+    "RelativePath": "quotes/daily",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "chatId",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "time",
+        "Type": "System.TimeSpan",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "AddToFavorites",
+    "RelativePath": "quotes/favorites/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "quote",
+        "Type": "MotivationQuotesAPI.Models.Quote",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "RemoveFromFavorites",
+    "RelativePath": "quotes/favorites/delete/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetFavorites",
+    "RelativePath": "quotes/favorites/list",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetSearchHistory",
+    "RelativePath": "quotes/history",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "ClearSearchHistory",
+    "RelativePath": "quotes/history/clear",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetQuoteImage",
+    "RelativePath": "quotes/image",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "SendDailyQuotes",
+    "RelativePath": "quotes/quotes/daily/send",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "time",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetRandomQuote",
+    "RelativePath": "quotes/random",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetRating",
+    "RelativePath": "quotes/rating/{quoteId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "quoteId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetTopFavorites",
+    "RelativePath": "quotes/top",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "UnsubscribeFromDaily",
+    "RelativePath": "quotes/unsubscribe",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "chatId",
+        "Type": "System.Int64",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

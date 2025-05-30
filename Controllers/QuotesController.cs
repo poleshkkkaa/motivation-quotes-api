@@ -311,7 +311,13 @@ namespace MotivationQuotesAPI.Controllers
         [HttpPost("quotes/daily/send")]
         public async Task<IActionResult> SendDailyQuotes([FromQuery] string time)
         {
-            var subscribers = await _dbContext.DailySubscribers.Where(s => s.PreferredTime == time).ToListAsync();
+            Console.WriteLine($"⏰ Час запиту: {time}");
+
+            var subscribers = await _dbContext.DailySubscribers
+                .Where(s => s.PreferredTime == time)
+                .ToListAsync();
+
+            Console.WriteLine($"👥 Підписників знайдено: {subscribers.Count}");
 
             if (!subscribers.Any())
                 return Ok("👥 Немає підписників на цей час.");
@@ -319,18 +325,28 @@ namespace MotivationQuotesAPI.Controllers
             using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync("https://motivation-quotes-api-production.up.railway.app/quotes/random");
 
+            Console.WriteLine($"🌐 Статус цитати: {response.StatusCode}");
+
             if (!response.IsSuccessStatusCode)
                 return StatusCode((int)response.StatusCode, "❌ Не вдалося отримати цитату.");
 
             var json = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"📦 JSON від API: {json}");
+
             var quote = JsonSerializer.Deserialize<ApiQuote>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (quote == null)
+            {
+                Console.WriteLine("⚠️ Помилка: Цитата пуста.");
                 return StatusCode(500, "⚠️ Невірні дані цитати.");
+            }
 
             var botToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(botToken))
+            {
+                Console.WriteLine("⚠️ BOT_TOKEN не знайдено.");
                 return StatusCode(500, "⚠️ BOT_TOKEN не встановлений в змінних середовища.");
+            }
 
             var botClient = new TelegramBotClient(botToken);
 
@@ -340,8 +356,10 @@ namespace MotivationQuotesAPI.Controllers
                 await botClient.SendTextMessageAsync(user.ChatId, msg);
             }
 
+            Console.WriteLine("✅ Успішно надіслано всім.");
             return Ok("✅ Цитати надіслано всім підписникам.");
         }
+
 
         [HttpGet("rating/{quoteId}")]
         public async Task<IActionResult> GetRating(int quoteId)
