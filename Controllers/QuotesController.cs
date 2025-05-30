@@ -314,7 +314,7 @@ namespace MotivationQuotesAPI.Controllers
         {
             Console.WriteLine($"⏰ Час запиту: {time}");
 
-            if (!TimeSpan.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, out var parsedTime))
+            if (!TimeSpan.TryParseExact(time, "HH\\:mm\\:ss", CultureInfo.InvariantCulture, out var parsedTime))
                 return BadRequest("❌ Неправильний формат часу");
 
             var subscribers = await _dbContext.DailySubscribers
