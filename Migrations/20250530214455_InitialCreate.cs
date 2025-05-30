@@ -14,6 +14,23 @@ namespace MotivationQuotesApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "QuoteReactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    QuoteId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    ReactionType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuoteReactions", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Quotes",
                 columns: table => new
                 {
@@ -23,7 +40,9 @@ namespace MotivationQuotesApi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Author = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsFavorite = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsFavorite = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Likes = table.Column<int>(type: "int", nullable: false),
+                    Dislikes = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -77,6 +96,9 @@ namespace MotivationQuotesApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Favorites");
+
+            migrationBuilder.DropTable(
+                name: "QuoteReactions");
 
             migrationBuilder.DropTable(
                 name: "SearchHistories");

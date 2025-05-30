@@ -245,6 +245,46 @@ namespace MotivationQuotesAPI.Controllers
             return File(imageBytes, contentType);
         }
 
+        [HttpPost("quotes/react")]
+        public async Task<IActionResult> ReactToQuote([FromBody] ReactionRequest request)
+        {
+            var quote = await _dbContext.Quotes.FindAsync(request.QuoteId);
+            if (quote == null)
+                return NotFound("❌ Цитата не знайдена.");
+
+            var existingReaction = await _dbContext.QuoteReactions
+                .FirstOrDefaultAsync(r => r.QuoteId == request.QuoteId && r.UserId == request.UserId);
+
+            if (existingReaction != null)
+            {
+                if (existingReaction.ReactionType == request.ReactionType)
+                {
+                    return BadRequest("⚠️ Ви вже поставили цю реакцію.");
+                }
+
+                if (existingReaction.ReactionType == "like") quote.Likes--;
+                if (existingReaction.ReactionType == "dislike") quote.Dislikes--;
+
+                existingReaction.ReactionType = request.ReactionType;
+            }
+            else
+            {
+                _dbContext.QuoteReactions.Add(new QuoteReaction
+                {
+                    QuoteId = request.QuoteId,
+                    UserId = request.UserId,
+                    ReactionType = request.ReactionType
+                });
+            }
+
+            if (request.ReactionType == "like") quote.Likes++;
+            if (request.ReactionType == "dislike") quote.Dislikes++;
+
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { quote.Likes, quote.Dislikes });
+        }
+
 
 
     }

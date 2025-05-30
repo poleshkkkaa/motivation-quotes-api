@@ -10,6 +10,7 @@ namespace MotivationQuotesAPI.Models
         public DbSet<Quote> Quotes { get; set; } = null!;
         public DbSet<Favorite> Favorites { get; set; } = null!;
         public DbSet<SearchHistory> SearchHistories { get; set; } = null!;
+        public DbSet<QuoteReaction> QuoteReactions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
