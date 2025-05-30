@@ -7,6 +7,8 @@ Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var testToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
+Console.WriteLine($"DEBUG: BOT_TOKEN = {testToken}");
 
 builder.Services.AddDbContext<QuotesDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(9, 3, 0)))
