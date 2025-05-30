@@ -19,23 +19,6 @@ namespace MotivationQuotesApi.Migrations
                 .HasAnnotation("ProductVersion", "6.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("MotivationQuotesAPI.Models.DailySubscriber", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("PreferredTime")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DailySubscribers");
-                });
-
             modelBuilder.Entity("MotivationQuotesAPI.Models.Favorite", b =>
                 {
                     b.Property<int>("Id")
@@ -72,26 +55,6 @@ namespace MotivationQuotesApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Quotes");
-                });
-
-            modelBuilder.Entity("MotivationQuotesAPI.Models.QuoteReaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsLike")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("QuoteId")
-                        .HasColumnType("int");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QuoteReactions");
                 });
 
             modelBuilder.Entity("MotivationQuotesAPI.Models.SearchHistory", b =>

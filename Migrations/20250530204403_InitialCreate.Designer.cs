@@ -11,7 +11,7 @@ using MotivationQuotesAPI.Models;
 namespace MotivationQuotesApi.Migrations
 {
     [DbContext(typeof(QuotesDbContext))]
-    [Migration("20250529185643_InitialCreate")]
+    [Migration("20250530204403_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,23 +20,6 @@ namespace MotivationQuotesApi.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            modelBuilder.Entity("MotivationQuotesAPI.Models.DailySubscriber", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("PreferredTime")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DailySubscribers");
-                });
 
             modelBuilder.Entity("MotivationQuotesAPI.Models.Favorite", b =>
                 {
@@ -74,26 +57,6 @@ namespace MotivationQuotesApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Quotes");
-                });
-
-            modelBuilder.Entity("MotivationQuotesAPI.Models.QuoteReaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsLike")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("QuoteId")
-                        .HasColumnType("int");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QuoteReactions");
                 });
 
             modelBuilder.Entity("MotivationQuotesAPI.Models.SearchHistory", b =>
