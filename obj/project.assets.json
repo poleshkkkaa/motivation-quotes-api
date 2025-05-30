@@ -7294,6 +7294,7 @@
       "Newtonsoft.Json >= 13.0.3",
       "Pomelo.EntityFrameworkCore.MySql >= 6.0.2",
       "Swashbuckle.AspNetCore >= 6.2.3",
+      "System.IO >= 4.3.0",
       "Telegram.Bot >= 18.0.0"
     ]
   },
@@ -7384,6 +7385,10 @@
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.2.3, )"
+          },
+          "System.IO": {
+            "target": "Package",
+            "version": "[4.3.0, )"
           },
           "Telegram.Bot": {
             "target": "Package",

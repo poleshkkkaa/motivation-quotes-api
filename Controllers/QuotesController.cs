@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using System.Globalization;
 using DotNetEnv;
+using System.Collections;
 
 namespace MotivationQuotesAPI.Controllers
 {
@@ -316,7 +317,28 @@ namespace MotivationQuotesAPI.Controllers
         [HttpPost("daily/send")]
         public async Task<IActionResult> SendDailyQuotes([FromQuery] string time)
         {
-            Env.Load();
+            var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+            Console.WriteLine($"📄 Очікуваний шлях до .env: {envPath}");
+
+            if (System.IO.File.Exists(envPath))
+            {
+                Console.WriteLine("✅ .env файл знайдено");
+                DotNetEnv.Env.Load(envPath);
+            }
+            else
+            {
+                Console.WriteLine("❌ .env файл НЕ знайдено");
+            }
+
+            // ДОДАЙ ОСЬ ЦЕ ↓
+            foreach (var pair in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>())
+            {
+                Console.WriteLine($"{pair.Key} = {pair.Value}");
+            }
+
+            var botToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
+            Console.WriteLine($"🔐 BOT_TOKEN = {(string.IsNullOrEmpty(botToken) ? "❌ НЕ ЗНАЙДЕНО" : botToken)}");
+
             Console.WriteLine($"⏰ Час запиту: {time}");
 
             if (!TimeSpan.TryParseExact(time, @"hh\:mm\:ss", CultureInfo.InvariantCulture, out var parsedTime))
@@ -350,7 +372,6 @@ namespace MotivationQuotesAPI.Controllers
                 return StatusCode(500, "⚠️ Невірні дані цитати.");
             }
 
-            var botToken = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(botToken))
             {
                 Console.WriteLine("⚠️ BOT_TOKEN не знайдено.");
