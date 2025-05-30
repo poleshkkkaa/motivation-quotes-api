@@ -365,11 +365,16 @@ namespace MotivationQuotesAPI.Controllers
                 {
                     await botClient.SendTextMessageAsync(user.ChatId, msg);
                 }
+                catch (Telegram.Bot.Exceptions.ApiRequestException apiEx)
+                {
+                    Console.WriteLine($"❌ Telegram API Error для ChatId {user.ChatId}: {apiEx.ErrorCode} - {apiEx.Message}");
+                }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"❌ Помилка надсилання користувачу {user.ChatId}: {ex.Message}");
+                    Console.WriteLine($"❌ Помилка надсилання до ChatId {user.ChatId}: {ex.Message}");
                 }
             }
+
 
             Console.WriteLine("✅ Успішно надіслано всім.");
             return Ok("✅ Цитати надіслано всім підписникам.");
