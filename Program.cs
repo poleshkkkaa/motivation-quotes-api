@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
-Env.Load();
+Env.Load(); 
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -29,7 +30,7 @@ app.Urls.Add("http://*:8080");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuotesDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
 }
 
 app.Run();
