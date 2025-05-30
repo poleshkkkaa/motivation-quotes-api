@@ -7,6 +7,7 @@ using System.IO;
 using DotNetEnv;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using System.Globalization;
 
 namespace MotivationQuotesAPI.Controllers
 {
@@ -280,7 +281,7 @@ namespace MotivationQuotesAPI.Controllers
             _dbContext.DailySubscribers.Add(new DailySubscriber
             {
                 ChatId = chatId,
-                PreferredTime = time.ToString(@"HH:mm")
+                PreferredTime = time
             });
 
             await _dbContext.SaveChangesAsync();
@@ -313,8 +314,11 @@ namespace MotivationQuotesAPI.Controllers
         {
             Console.WriteLine($"⏰ Час запиту: {time}");
 
+            if (!TimeSpan.TryParseExact(time, "hh\\:mm", CultureInfo.InvariantCulture, out var parsedTime))
+                return BadRequest("❌ Невірний формат часу.");
+
             var subscribers = await _dbContext.DailySubscribers
-                .Where(s => s.PreferredTime == time)
+                .Where(s => s.PreferredTime == parsedTime)
                 .ToListAsync();
 
             Console.WriteLine($"👥 Підписників знайдено: {subscribers.Count}");
