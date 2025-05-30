@@ -8,6 +8,7 @@ using DotNetEnv;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using System.Globalization;
+using DotNetEnv;
 
 namespace MotivationQuotesAPI.Controllers
 {
@@ -315,6 +316,7 @@ namespace MotivationQuotesAPI.Controllers
         [HttpPost("daily/send")]
         public async Task<IActionResult> SendDailyQuotes([FromQuery] string time)
         {
+            Env.Load();
             Console.WriteLine($"⏰ Час запиту: {time}");
 
             if (!TimeSpan.TryParseExact(time, @"hh\:mm\:ss", CultureInfo.InvariantCulture, out var parsedTime))
