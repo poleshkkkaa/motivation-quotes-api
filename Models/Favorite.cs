@@ -6,6 +6,7 @@ namespace MotivationQuotesAPI.Models
     {
         public int Id { get; set; }
         public int QuoteId { get; set; }
+        public long UserId { get; set; }
         public Quote Quote { get; set; } = null!;
     }
 }

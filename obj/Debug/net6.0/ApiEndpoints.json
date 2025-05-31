@@ -53,6 +53,16 @@
   },
   {
     "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
+    "Method": "GetTopFavorites",
+    "RelativePath": "quotes/favorites/top",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
     "Method": "GetSearchHistory",
     "RelativePath": "quotes/history",
     "HttpMethod": "GET",

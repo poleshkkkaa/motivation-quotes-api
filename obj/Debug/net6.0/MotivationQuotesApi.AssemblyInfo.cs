@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MotivationQuotesApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+27f85e84c53f21fe263676928f2152cbb5437304")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0af1faf071103caeadd53418fd24695b9062be62")]
 [assembly: System.Reflection.AssemblyProductAttribute("MotivationQuotesApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MotivationQuotesApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

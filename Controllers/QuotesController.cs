@@ -134,7 +134,7 @@ namespace MotivationQuotesAPI.Controllers
             }
 
             // Перевіряємо, чи цитата вже в улюблених
-            var existingFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == existingQuote.Id);
+            var existingFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == existingQuote.Id && f.UserId == quote.UserId);
 
             if (existingFavorite)
             {
@@ -144,8 +144,10 @@ namespace MotivationQuotesAPI.Controllers
             // Додаємо цитату до улюблених
             var favorite = new Favorite
             {
-                QuoteId = existingQuote.Id
+                QuoteId = existingQuote.Id,
+                UserId = quote.UserId
             };
+
             _dbContext.Favorites.Add(favorite);
             await _dbContext.SaveChangesAsync();
 
@@ -154,9 +156,14 @@ namespace MotivationQuotesAPI.Controllers
 
         // Отримати список усіх улюблених цитат
         [HttpGet("favorites/list")]
-        public async Task<IActionResult> GetFavorites()
+        public async Task<IActionResult> GetFavorites([FromQuery] long userId)
         {
-            var favorites = await _dbContext.Favorites.Include(f => f.Quote).ToListAsync();
+            if (userId == 0)
+            {
+                return BadRequest("UserId є обов'язковим.");
+            }
+
+            var favorites = await _dbContext.Favorites.Where(f => f.UserId == userId).Include(f => f.Quote).ToListAsync();
 
             if (favorites.Count == 0)
             {
@@ -181,13 +188,18 @@ namespace MotivationQuotesAPI.Controllers
 
         // Видалити цитату з улюблених
         [HttpDelete("favorites/delete/{id}")]
-        public async Task<IActionResult> RemoveFromFavorites(int id)
+        public async Task<IActionResult> RemoveFromFavorites(int id, [FromQuery] long userId)
         {
-            var favorite = await _dbContext.Favorites.FirstOrDefaultAsync(f => f.QuoteId == id);
+            if (userId == 0)
+            {
+                return BadRequest("UserId є обов'язковим.");
+            }
+
+            var favorite = await _dbContext.Favorites.FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
 
             if (favorite == null)
             {
-                return NotFound("Цитату не знайдено серед улюблених.");
+                return NotFound("Цитату не знайдено серед улюблених для цього користувача.");
             }
 
             _dbContext.Favorites.Remove(favorite);
@@ -198,9 +210,14 @@ namespace MotivationQuotesAPI.Controllers
 
         //показати історію пошуку
         [HttpGet("history")]
-        public async Task<IActionResult> GetSearchHistory()
+        public async Task<IActionResult> GetSearchHistory([FromQuery] long userId)
         {
-            var history = await _dbContext.SearchHistories.OrderByDescending(h => h.SearchDate).Take(5).ToListAsync();
+            if (userId == 0)
+            {
+                return BadRequest("UserId є обов'язковим.");
+            }
+
+            var history = await _dbContext.SearchHistories.Where(h => h.UserId == userId).OrderByDescending(h => h.SearchDate).Take(5).ToListAsync();
 
             if (history.Count == 0)
             {
@@ -212,16 +229,21 @@ namespace MotivationQuotesAPI.Controllers
 
         //очищити історію пошуку
         [HttpDelete("history/clear")]
-        public async Task<IActionResult> ClearSearchHistory()
+        public async Task<IActionResult> ClearSearchHistory([FromQuery] long userId)
         {
-            var allHistory = await _dbContext.SearchHistories.ToListAsync();
-
-            if (allHistory == null || allHistory.Count == 0)
+            if (userId == 0)
             {
-                return NotFound("Історії пошуку цитат ще немає.");
+                return BadRequest("UserId є обов'язковим.");
             }
 
-            _dbContext.SearchHistories.RemoveRange(allHistory);
+            var userHistory = await _dbContext.SearchHistories.Where(h => h.UserId == userId).ToListAsync();
+
+            if (userHistory.Count == 0)
+            {
+                return NotFound("Історії пошуку для цього користувача ще немає.");
+            }
+
+            _dbContext.SearchHistories.RemoveRange(userHistory);
             await _dbContext.SaveChangesAsync();
 
             return Ok(new { message = "Історію пошуку успішно очищено." });
@@ -284,8 +306,6 @@ namespace MotivationQuotesAPI.Controllers
 
             return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
-
-
 
     }
 }
