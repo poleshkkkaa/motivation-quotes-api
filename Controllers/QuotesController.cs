@@ -31,8 +31,8 @@ namespace MotivationQuotesAPI.Controllers
         }
 
         // Отримати випадкову цитату з зовнішнього API
-        [HttpGet("random")]
-        public async Task<IActionResult> GetRandomQuote()
+        [HttpPost("random")]
+        public async Task<IActionResult> GetRandomQuote([FromBody] ReactionRequest request)
         {
             HttpResponseMessage response;
             try
@@ -66,17 +66,7 @@ namespace MotivationQuotesAPI.Controllers
                 var random = new Random();
                 var randomQuote = quotes[random.Next(quotes.Count)];
 
-                // Зберігаємо в історію пошуків
-                var searchHistory = new SearchHistory
-                {
-                    Query = $"{randomQuote.QuoteText} — {randomQuote.Author}",
-                    SearchDate = DateTime.UtcNow
-                };
-
-                _dbContext.SearchHistories.Add(searchHistory);
-                await _dbContext.SaveChangesAsync();
-
-                // Перевіряємо, чи вже є така цитата в базі
+                // Перевірка чи цитата є в БД
                 var existingQuote = await _dbContext.Quotes
                     .FirstOrDefaultAsync(q => q.Text == randomQuote.QuoteText && q.Author == randomQuote.Author);
 
@@ -85,29 +75,45 @@ namespace MotivationQuotesAPI.Controllers
                     existingQuote = new Quote
                     {
                         Text = randomQuote.QuoteText,
-                        Author = randomQuote.Author
+                        Author = randomQuote.Author,
+                        Likes = 0,
+                        Dislikes = 0
                     };
 
                     _dbContext.Quotes.Add(existingQuote);
                     await _dbContext.SaveChangesAsync();
                 }
 
+                var history = new SearchHistory
+                {
+                    UserId = request.UserId,
+                    Query = $"{existingQuote.Text} — {existingQuote.Author}",
+                    SearchDate = DateTime.UtcNow
+                };
+
+                _dbContext.SearchHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
                 return Ok(new
                 {
                     id = existingQuote.Id,
                     text = existingQuote.Text,
                     author = existingQuote.Author,
+                    likes = existingQuote.Likes,
+                    dislikes = existingQuote.Dislikes,
+                    userId = request.UserId
                 });
             }
             catch (JsonException ex)
             {
-                return StatusCode(500, $"Помилка обробки JSON: {ex.Message}");
+                return StatusCode(500, $"JSON помилка: {ex.Message}");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Невідома помилка: {ex.Message}");
             }
         }
+
 
         // Додати цитату до улюблених
         [HttpPost("favorites/add")]
