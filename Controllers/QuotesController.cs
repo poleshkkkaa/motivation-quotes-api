@@ -113,8 +113,7 @@ namespace MotivationQuotesAPI.Controllers
                 return BadRequest("Текст і автор цитати є обов'язковими.");
 
             // Перевіряємо, чи цитата вже є в базі
-            var existingQuote = await _dbContext.Quotes
-                .FirstOrDefaultAsync(q => q.Text == quote.Text && q.Author == quote.Author);
+            var existingQuote = await _dbContext.Quotes.FirstOrDefaultAsync(q => q.Text == quote.Text && q.Author == quote.Author);
 
             if (existingQuote == null)
             {
@@ -128,8 +127,7 @@ namespace MotivationQuotesAPI.Controllers
             }
 
             // Чи вже додано в улюблені
-            bool alreadyFavorite = await _dbContext.Favorites
-                .AnyAsync(f => f.QuoteId == existingQuote.Id && f.UserId == quote.UserId);
+            bool alreadyFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == existingQuote.Id && f.UserId == quote.UserId);
 
             if (alreadyFavorite)
                 return Conflict("Цитата вже в улюблених.");
@@ -148,10 +146,7 @@ namespace MotivationQuotesAPI.Controllers
         [HttpGet("favorites/list")]
         public async Task<IActionResult> GetFavorites([FromQuery] long userId)
         {
-            var favorites = await _dbContext.Favorites
-                .Include(f => f.Quote)
-                .Where(f => f.UserId == userId)
-                .ToListAsync();
+            var favorites = await _dbContext.Favorites.Include(f => f.Quote).Where(f => f.UserId == userId).ToListAsync();
 
             return Ok(new
             {
@@ -170,12 +165,12 @@ namespace MotivationQuotesAPI.Controllers
         [HttpDelete("favorites/delete/{id}")]
         public async Task<IActionResult> RemoveFromFavorites(int id, [FromQuery] long userId)
         {
-            var favorite = await _dbContext.Favorites
-                .FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
+            var favorite = await _dbContext.Favorites.FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
 
             if (favorite == null)
+            {
                 return NotFound("Цитату не знайдено серед улюблених.");
-
+            }
             _dbContext.Favorites.Remove(favorite);
             await _dbContext.SaveChangesAsync();
 
@@ -187,11 +182,7 @@ namespace MotivationQuotesAPI.Controllers
         [HttpGet("history")]
         public async Task<IActionResult> GetSearchHistory([FromQuery] long userId)
         {
-            var history = await _dbContext.SearchHistories
-                .Where(h => h.UserId == userId)
-                .OrderByDescending(h => h.SearchDate)
-                .Take(5)
-                .ToListAsync();
+            var history = await _dbContext.SearchHistories.Where(h => h.UserId == userId).OrderByDescending(h => h.SearchDate).Take(5).ToListAsync();
 
             if (history.Count == 0)
                 return NotFound("Історія порожня.");
@@ -206,8 +197,9 @@ namespace MotivationQuotesAPI.Controllers
             var userHistory = _dbContext.SearchHistories.Where(h => h.UserId == userId).ToList();
 
             if (!userHistory.Any())
+            {
                 return NotFound("Історії ще немає.");
-
+            }
             _dbContext.SearchHistories.RemoveRange(userHistory);
             await _dbContext.SaveChangesAsync();
 
@@ -271,6 +263,43 @@ namespace MotivationQuotesAPI.Controllers
 
             return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
+
+        [HttpPut("quotes/{id}")]
+        public async Task<IActionResult> EditQuote(int id, [FromQuery] long userId, [FromBody] Quote updatedQuote)
+        {
+            if (string.IsNullOrWhiteSpace(updatedQuote.Text))
+                return BadRequest("Текст цитати не може бути порожнім.");
+
+            var existingQuote = await _dbContext.Quotes.FindAsync(id);
+
+            if (existingQuote == null)
+                return NotFound("Цитату не знайдено.");
+
+            // Оновлюємо цитату
+            existingQuote.Text = updatedQuote.Text;
+            existingQuote.Author = string.IsNullOrWhiteSpace(updatedQuote.Author) ? "" : updatedQuote.Author;
+
+            await _dbContext.SaveChangesAsync();
+
+            // Перевіряємо, чи вже є в улюблених у цього користувача
+            var isFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == id && f.UserId == userId);
+
+            if (!isFavorite)
+            {
+                var favorite = new Favorite
+                {
+                    QuoteId = id,
+                    UserId = userId
+                };
+
+                _dbContext.Favorites.Add(favorite);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return Ok(new { message = "Цитату успішно оновлено та збережено в улюблені." });
+        }
+
+
 
     }
 }
