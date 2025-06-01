@@ -32,96 +32,92 @@ namespace MotivationQuotesAPI.Controllers
 
         // Отримати випадкову цитату з зовнішнього API
         [HttpGet("random")]
-        public async Task<IActionResult> GetRandomQuote()
+        public async Task<IActionResult> GetRandomQuote([FromQuery] long userId)
         {
-            HttpResponseMessage response;
-            try
-            {
-                response = await _httpClient.GetAsync("https://zenquotes.io/api/quotes");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Не вдалося здійснити запит до зовнішнього API: {ex.Message}");
-            }
-
+            var response = await _httpClient.GetAsync("https://zenquotes.io/api/quotes");
             if (!response.IsSuccessStatusCode)
-            {
                 return StatusCode((int)response.StatusCode, "Помилка при отриманні цитат.");
+
+            var content = await response.Content.ReadAsStringAsync();
+            var quotes = JsonSerializer.Deserialize<List<ApiQuote>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (quotes == null || quotes.Count == 0)
+                return NotFound("Цитати не знайдені.");
+
+            var random = new Random();
+            var randomQuote = quotes[random.Next(quotes.Count)];
+
+            // Шукаємо цитату в базі
+            var existingQuote = await _dbContext.Quotes.FirstOrDefaultAsync(q => q.Text == randomQuote.QuoteText && q.Author == randomQuote.Author);
+            if (existingQuote == null)
+            {
+                existingQuote = new Quote
+                {
+                    Text = randomQuote.QuoteText,
+                    Author = randomQuote.Author,
+                    Likes = 0,
+                    Dislikes = 0
+                };
+                _dbContext.Quotes.Add(existingQuote);
+                await _dbContext.SaveChangesAsync();
             }
 
-            try
+            // Перевірка чи користувач вже бачив цю цитату
+            var alreadySeen = await _dbContext.SearchHistories
+                .AnyAsync(h => h.UserId == userId && h.Query == $"{existingQuote.Text} — {existingQuote.Author}");
+
+            if (!alreadySeen)
             {
-                var content = await response.Content.ReadAsStringAsync();
-
-                var quotes = JsonSerializer.Deserialize<List<ApiQuote>>(content, new JsonSerializerOptions
+                var history = new SearchHistory
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (quotes == null || quotes.Count == 0)
-                {
-                    return NotFound("Цитати не знайдені.");
-                }
-
-                var random = new Random();
-                var randomQuote = quotes[random.Next(quotes.Count)];
-
-                var searchHistory = new SearchHistory
-                {
-                    Query = $"{randomQuote.QuoteText} — {randomQuote.Author}",
+                    UserId = userId,
+                    Query = $"{existingQuote.Text} — {existingQuote.Author}",
                     SearchDate = DateTime.UtcNow
                 };
-
-                _dbContext.SearchHistories.Add(searchHistory);
+                _dbContext.SearchHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
-
-                var existingQuote = await _dbContext.Quotes
-                    .FirstOrDefaultAsync(q => q.Text == randomQuote.QuoteText && q.Author == randomQuote.Author);
-
-                if (existingQuote == null)
-                {
-                    existingQuote = new Quote
-                    {
-                        Text = randomQuote.QuoteText,
-                        Author = randomQuote.Author
-                    };
-
-                    _dbContext.Quotes.Add(existingQuote);
-                    await _dbContext.SaveChangesAsync();
-                }
-
-                return Ok(new
-                {
-                    id = existingQuote.Id,
-                    text = existingQuote.Text,
-                    author = existingQuote.Author,
-                });
             }
-            catch (JsonException ex)
+
+            // Перевірити, чи користувач переглянув усі цитати
+            var seenCount = await _dbContext.SearchHistories
+                .CountAsync(h => h.UserId == userId);
+            var totalCount = await _dbContext.Quotes.CountAsync();
+
+            if (seenCount >= totalCount)
             {
-                return StatusCode(500, $"Помилка обробки JSON: {ex.Message}");
+                // Очистити історію тільки цього користувача
+                var userHistory = _dbContext.SearchHistories.Where(h => h.UserId == userId);
+                _dbContext.SearchHistories.RemoveRange(userHistory);
+                await _dbContext.SaveChangesAsync();
             }
-            catch (Exception ex)
+
+            return Ok(new
             {
-                return StatusCode(500, $"Невідома помилка: {ex.Message}");
-            }
+                id = existingQuote.Id,
+                text = existingQuote.Text,
+                author = existingQuote.Author,
+                likes = existingQuote.Likes,
+                dislikes = existingQuote.Dislikes
+            });
         }
+
 
         // Додати цитату до улюблених
         [HttpPost("favorites/add")]
         public async Task<IActionResult> AddToFavorites([FromBody] Quote quote)
         {
             if (quote == null || string.IsNullOrEmpty(quote.Text) || string.IsNullOrEmpty(quote.Author))
-            {
                 return BadRequest("Текст і автор цитати є обов'язковими.");
-            }
 
-            // Перевіряємо, чи цитата вже існує в базі
-            var existingQuote = await _dbContext.Quotes.FirstOrDefaultAsync(q => q.Text == quote.Text && q.Author == quote.Author);
+            // Перевіряємо, чи цитата вже є в базі
+            var existingQuote = await _dbContext.Quotes
+                .FirstOrDefaultAsync(q => q.Text == quote.Text && q.Author == quote.Author);
 
             if (existingQuote == null)
             {
-                // Якщо цитата не існує, додаємо її
                 existingQuote = new Quote
                 {
                     Text = quote.Text,
@@ -131,46 +127,31 @@ namespace MotivationQuotesAPI.Controllers
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Перевіряємо, чи цитата вже в улюблених
-            var existingFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == existingQuote.Id && f.UserId == quote.UserId);
+            // Чи вже додано в улюблені
+            bool alreadyFavorite = await _dbContext.Favorites
+                .AnyAsync(f => f.QuoteId == existingQuote.Id && f.UserId == quote.UserId);
 
-            if (existingFavorite)
-            {
-                return Conflict("Цитата вже додана до улюблених.");
-            }
+            if (alreadyFavorite)
+                return Conflict("Цитата вже в улюблених.");
 
-            // Додаємо цитату до улюблених
             var favorite = new Favorite
             {
                 QuoteId = existingQuote.Id,
                 UserId = quote.UserId
             };
-
             _dbContext.Favorites.Add(favorite);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new { message = "Цитата успішно додана до улюблених." });
+            return Ok(new { message = "Цитата додана до улюблених." });
         }
 
-        // Отримати список усіх улюблених цитат
         [HttpGet("favorites/list")]
         public async Task<IActionResult> GetFavorites([FromQuery] long userId)
         {
-            if (userId == 0)
-            {
-                return BadRequest("UserId є обов'язковим.");
-            }
-
-            var favorites = await _dbContext.Favorites.Where(f => f.UserId == userId).Include(f => f.Quote).ToListAsync();
-
-            if (favorites.Count == 0)
-            {
-                return Ok(new
-                {
-                    count = 0,
-                    quotes = new List<object>()
-                });
-            }
+            var favorites = await _dbContext.Favorites
+                .Include(f => f.Quote)
+                .Where(f => f.UserId == userId)
+                .ToListAsync();
 
             return Ok(new
             {
@@ -184,43 +165,36 @@ namespace MotivationQuotesAPI.Controllers
             });
         }
 
+
         // Видалити цитату з улюблених
         [HttpDelete("favorites/delete/{id}")]
         public async Task<IActionResult> RemoveFromFavorites(int id, [FromQuery] long userId)
         {
-            if (userId == 0)
-            {
-                return BadRequest("UserId є обов'язковим.");
-            }
-
-            var favorite = await _dbContext.Favorites.FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
+            var favorite = await _dbContext.Favorites
+                .FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
 
             if (favorite == null)
-            {
-                return NotFound("Цитату не знайдено серед улюблених для цього користувача.");
-            }
+                return NotFound("Цитату не знайдено серед улюблених.");
 
             _dbContext.Favorites.Remove(favorite);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new { message = "Цитата успішно видалена з улюблених." });
+            return Ok(new { message = "Цитата видалена з улюблених." });
         }
+
 
         //показати історію пошуку
         [HttpGet("history")]
         public async Task<IActionResult> GetSearchHistory([FromQuery] long userId)
         {
-            if (userId == 0)
-            {
-                return BadRequest("UserId є обов'язковим.");
-            }
-
-            var history = await _dbContext.SearchHistories.Where(h => h.UserId == userId).OrderByDescending(h => h.SearchDate).Take(5).ToListAsync();
+            var history = await _dbContext.SearchHistories
+                .Where(h => h.UserId == userId)
+                .OrderByDescending(h => h.SearchDate)
+                .Take(5)
+                .ToListAsync();
 
             if (history.Count == 0)
-            {
                 return NotFound("Історія порожня.");
-            }
 
             return Ok(history);
         }
@@ -229,22 +203,15 @@ namespace MotivationQuotesAPI.Controllers
         [HttpDelete("history/clear")]
         public async Task<IActionResult> ClearSearchHistory([FromQuery] long userId)
         {
-            if (userId == 0)
-            {
-                return BadRequest("UserId є обов'язковим.");
-            }
+            var userHistory = _dbContext.SearchHistories.Where(h => h.UserId == userId).ToList();
 
-            var userHistory = await _dbContext.SearchHistories.Where(h => h.UserId == userId).ToListAsync();
-
-            if (userHistory.Count == 0)
-            {
-                return NotFound("Історії пошуку для цього користувача ще немає.");
-            }
+            if (!userHistory.Any())
+                return NotFound("Історії ще немає.");
 
             _dbContext.SearchHistories.RemoveRange(userHistory);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new { message = "Історію пошуку успішно очищено." });
+            return Ok(new { message = "Історія очищена." });
         }
 
         //картинка з цитатами
