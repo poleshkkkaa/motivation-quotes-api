@@ -32,7 +32,7 @@ namespace MotivationQuotesAPI.Controllers
 
         // Отримати випадкову цитату з зовнішнього API
         [HttpGet("random")]
-        public async Task<IActionResult> GetRandomQuote()
+        public async Task<IActionResult> GetRandomQuote([FromQuery] long userId)
         {
             HttpResponseMessage response;
             try

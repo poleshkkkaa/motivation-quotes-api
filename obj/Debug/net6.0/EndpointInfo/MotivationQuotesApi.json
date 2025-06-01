@@ -22,6 +22,16 @@
         "tags": [
           "Quotes"
         ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -65,6 +75,16 @@
         "tags": [
           "Quotes"
         ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -86,6 +106,14 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ],
         "responses": {
@@ -100,6 +128,16 @@
         "tags": [
           "Quotes"
         ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -111,6 +149,16 @@
       "delete": {
         "tags": [
           "Quotes"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -161,18 +209,6 @@
           }
         }
       }
-    },
-    "/quotes/favorites/top": {
-      "get": {
-        "tags": [
-          "Quotes"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
     }
   },
   "components": {
@@ -195,6 +231,10 @@
           "isFavorite": {
             "type": "boolean"
           },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "likes": {
             "type": "integer",
             "format": "int32"
@@ -209,6 +249,10 @@
       "ReactionRequest": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
           "quoteId": {
             "type": "integer",
             "format": "int32"

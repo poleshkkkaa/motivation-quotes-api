@@ -75,3 +75,4 @@ C:\Users\Admin\Desktop\Kyrsach\MotivationQuotesApi\MotivationQuotesApi\obj\Debug
 C:\Users\Admin\Desktop\Kyrsach\MotivationQuotesApi\MotivationQuotesApi\bin\Debug\net6.0\DotNetEnv.dll
 C:\Users\Admin\Desktop\Kyrsach\MotivationQuotesApi\MotivationQuotesApi\bin\Debug\net6.0\Sprache.dll
 C:\Users\Admin\Desktop\Kyrsach\MotivationQuotesApi\MotivationQuotesApi\bin\Debug\net6.0\Telegram.Bot.dll
+C:\Users\Admin\Desktop\Kyrsach\MotivationQuotesApi\MotivationQuotesApi\obj\Debug\net6.0\staticwebassets.upToDateCheck.txt
