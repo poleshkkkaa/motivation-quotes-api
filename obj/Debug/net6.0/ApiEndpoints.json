@@ -106,7 +106,7 @@
   },
   {
     "ContainingType": "MotivationQuotesAPI.Controllers.QuotesController",
-    "Method": "EditQuote",
+    "Method": "EditFavoriteQuote",
     "RelativePath": "quotes/quotes/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
@@ -118,7 +118,12 @@
         "IsRequired": true
       },
       {
-        "Name": "updatedQuote",
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "updated",
         "Type": "MotivationQuotesAPI.Models.Quote",
         "IsRequired": true
       }

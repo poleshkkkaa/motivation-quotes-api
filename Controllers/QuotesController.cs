@@ -264,29 +264,6 @@ namespace MotivationQuotesAPI.Controllers
             return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
 
-        [HttpPut("quotes/{id}")]
-        public async Task<IActionResult> EditFavoriteQuote(int id, [FromQuery] long userId, [FromBody] Quote updated)
-        {
-            var favorite = await _dbContext.Favorites
-                .Include(f => f.Quote)
-                .FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
-
-            if (favorite == null)
-            {
-                return NotFound("Цитата не знайдена або не додана в улюблені цим користувачем.");
-            }
-
-            favorite.Quote.Text = updated.Text;
-            favorite.Quote.Author = string.IsNullOrWhiteSpace(updated.Author) ? "" : updated.Author;
-
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(new { message = "Цитату оновлено." });
-        }
-
-
-
-
     }
 }
 
