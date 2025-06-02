@@ -267,7 +267,9 @@ namespace MotivationQuotesAPI.Controllers
         [HttpPut("quotes/{id}")]
         public async Task<IActionResult> EditFavoriteQuote(int id, [FromQuery] long userId, [FromBody] Quote updated)
         {
-            var favorite = await _dbContext.Favorites.Include(f => f.Quote).FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
+            var favorite = await _dbContext.Favorites
+                .Include(f => f.Quote)
+                .FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
 
             if (favorite == null)
             {
