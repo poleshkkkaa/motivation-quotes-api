@@ -265,39 +265,23 @@ namespace MotivationQuotesAPI.Controllers
         }
 
         [HttpPut("quotes/{id}")]
-        public async Task<IActionResult> EditQuote(int id, [FromQuery] long userId, [FromBody] Quote updatedQuote)
+        public async Task<IActionResult> EditFavoriteQuote(int id, [FromQuery] long userId, [FromBody] Quote updated)
         {
-            if (string.IsNullOrWhiteSpace(updatedQuote.Text))
-                return BadRequest("Текст цитати не може бути порожнім.");
+            var favorite = await _dbContext.Favorites.Include(f => f.Quote).FirstOrDefaultAsync(f => f.QuoteId == id && f.UserId == userId);
 
-            var existingQuote = await _dbContext.Quotes.FindAsync(id);
+            if (favorite == null)
+            {
+                return NotFound("Цитата не знайдена або не додана в улюблені цим користувачем.");
+            }
 
-            if (existingQuote == null)
-                return NotFound("Цитату не знайдено.");
-
-            // Оновлюємо цитату
-            existingQuote.Text = updatedQuote.Text;
-            existingQuote.Author = string.IsNullOrWhiteSpace(updatedQuote.Author) ? "" : updatedQuote.Author;
+            favorite.Quote.Text = updated.Text;
+            favorite.Quote.Author = string.IsNullOrWhiteSpace(updated.Author) ? "" : updated.Author;
 
             await _dbContext.SaveChangesAsync();
 
-            // Перевіряємо, чи вже є в улюблених у цього користувача
-            var isFavorite = await _dbContext.Favorites.AnyAsync(f => f.QuoteId == id && f.UserId == userId);
-
-            if (!isFavorite)
-            {
-                var favorite = new Favorite
-                {
-                    QuoteId = id,
-                    UserId = userId
-                };
-
-                _dbContext.Favorites.Add(favorite);
-                await _dbContext.SaveChangesAsync();
-            }
-
-            return Ok(new { message = "Цитату успішно оновлено та збережено в улюблені." });
+            return Ok(new { message = "Цитату оновлено." });
         }
+
 
 
 
