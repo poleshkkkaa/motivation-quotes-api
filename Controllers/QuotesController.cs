@@ -240,8 +240,8 @@ namespace MotivationQuotesAPI.Controllers
         public async Task<IActionResult> ReactToQuote([FromBody] ReactionRequest request)
         {
             var quote = await _dbContext.Quotes.FindAsync(request.QuoteId);
-            if (quote == null)
-                return NotFound("Цитату не знайдено.");
+
+            if (quote == null) return NotFound("Цитату не знайдено.");
 
             var existing = await _dbContext.QuoteReactions
                 .FirstOrDefaultAsync(r => r.QuoteId == request.QuoteId && r.UserId == request.UserId);
@@ -249,51 +249,32 @@ namespace MotivationQuotesAPI.Controllers
             if (existing != null)
             {
                 if (existing.ReactionType == request.ReactionType)
-                {
-                    // Реакція така ж — нічого не змінюємо
-                }
-                else
-                {
-                    _dbContext.QuoteReactions.Remove(existing);
+                    return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
 
-                    _dbContext.QuoteReactions.Add(new QuoteReaction
-                    {
-                        QuoteId = request.QuoteId,
-                        UserId = request.UserId,
-                        ReactionType = request.ReactionType
-                    });
-                }
+                if (existing.ReactionType == "like") quote.Likes--;
+                else if (existing.ReactionType == "dislike") quote.Dislikes--;
+
+                _dbContext.QuoteReactions.Remove(existing);
             }
-            else
+
+            var reaction = new QuoteReaction
             {
-                // Перша реакція користувача
-                _dbContext.QuoteReactions.Add(new QuoteReaction
-                {
-                    QuoteId = request.QuoteId,
-                    UserId = request.UserId,
-                    ReactionType = request.ReactionType
-                });
-            }
+                QuoteId = request.QuoteId,
+                UserId = request.UserId,
+                ReactionType = request.ReactionType
+            };
 
+            if (reaction.ReactionType == "like") quote.Likes++;
+            else if (reaction.ReactionType == "dislike") quote.Dislikes++;
+
+            _dbContext.QuoteReactions.Add(reaction);
             await _dbContext.SaveChangesAsync();
 
-            // Оновлення загальних лічильників (напряму з Reaction таблиці)
-            var likes = await _dbContext.QuoteReactions
-                .CountAsync(r => r.QuoteId == request.QuoteId && r.ReactionType == "like");
+            Console.WriteLine($"Reaction: {request.ReactionType}, QuoteId: {request.QuoteId}, UserId: {request.UserId}");
+            Console.WriteLine($"Likes: {quote.Likes}, Dislikes: {quote.Dislikes}");
 
-            var dislikes = await _dbContext.QuoteReactions
-                .CountAsync(r => r.QuoteId == request.QuoteId && r.ReactionType == "dislike");
-
-            Console.WriteLine($"✅ Реакція: {request.ReactionType}, QuoteId: {request.QuoteId}, UserId: {request.UserId}");
-            Console.WriteLine($"❤️ {likes}, 👎 {dislikes}");
-
-            return Ok(new
-            {
-                Likes = likes,
-                Dislikes = dislikes
-            });
+            return Ok(new { Likes = quote.Likes, Dislikes = quote.Dislikes });
         }
-
 
     }
 }
