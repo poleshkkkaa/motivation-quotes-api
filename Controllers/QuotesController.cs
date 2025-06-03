@@ -88,8 +88,12 @@ namespace MotivationQuotesAPI.Controllers
                 .CountAsync(h => h.UserId == userId);
             var totalCount = await _dbContext.Quotes.CountAsync();
 
+            bool allSeen = false;
+
             if (seenCount >= totalCount)
             {
+                allSeen = true;
+
                 var userHistory = _dbContext.SearchHistories.Where(h => h.UserId == userId);
                 _dbContext.SearchHistories.RemoveRange(userHistory);
                 await _dbContext.SaveChangesAsync();
@@ -108,7 +112,8 @@ namespace MotivationQuotesAPI.Controllers
                 text = existingQuote.Text,
                 author = existingQuote.Author,
                 likes = likes,
-                dislikes = dislikes
+                dislikes = dislikes,
+                allSeen = allSeen
             });
         }
 
