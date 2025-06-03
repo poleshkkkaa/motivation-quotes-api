@@ -21,7 +21,7 @@ app.UseSwaggerUI();
 
 app.UseAuthorization();
 app.MapControllers();
-
+app.MapGet("/", () => "Motivation API is running");
 app.Urls.Add("http://*:8080");
 
 using (var scope = app.Services.CreateScope())
