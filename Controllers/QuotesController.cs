@@ -39,6 +39,11 @@ namespace MotivationQuotesAPI.Controllers
                 return StatusCode((int)response.StatusCode, "Помилка при отриманні цитат.");
 
             var content = await response.Content.ReadAsStringAsync();
+
+            // Захист від пустого або не-JSON контенту
+            if (string.IsNullOrWhiteSpace(content) || !content.TrimStart().StartsWith("["))
+                return StatusCode(500, "Некоректна відповідь від джерела цитат.");
+
             var quotes = JsonSerializer.Deserialize<List<ApiQuote>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -50,7 +55,6 @@ namespace MotivationQuotesAPI.Controllers
             var random = new Random();
             var randomQuote = quotes[random.Next(quotes.Count)];
 
-            // Шукаємо цитату в базі
             var existingQuote = await _dbContext.Quotes.FirstOrDefaultAsync(q =>
                 q.Text == randomQuote.QuoteText && q.Author == randomQuote.Author);
 
@@ -60,46 +64,38 @@ namespace MotivationQuotesAPI.Controllers
                 {
                     Text = randomQuote.QuoteText,
                     Author = randomQuote.Author,
-                    Likes = 0,
-                    Dislikes = 0
                 };
                 _dbContext.Quotes.Add(existingQuote);
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Перевірка чи користувач вже бачив цю цитату
             var alreadySeen = await _dbContext.SearchHistories
                 .AnyAsync(h => h.UserId == userId && h.Query == $"{existingQuote.Text} — {existingQuote.Author}");
 
             if (!alreadySeen)
             {
-                var history = new SearchHistory
+                _dbContext.SearchHistories.Add(new SearchHistory
                 {
                     UserId = userId,
                     Query = $"{existingQuote.Text} — {existingQuote.Author}",
                     SearchDate = DateTime.UtcNow
-                };
-                _dbContext.SearchHistories.Add(history);
+                });
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Перевірити, чи користувач переглянув усі цитати
             var seenCount = await _dbContext.SearchHistories
                 .CountAsync(h => h.UserId == userId);
             var totalCount = await _dbContext.Quotes.CountAsync();
 
             bool allSeen = false;
-
             if (seenCount >= totalCount)
             {
                 allSeen = true;
-
                 var userHistory = _dbContext.SearchHistories.Where(h => h.UserId == userId);
                 _dbContext.SearchHistories.RemoveRange(userHistory);
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Отримуємо реакції напряму з таблиці QuoteReactions
             var likes = await _dbContext.QuoteReactions
                 .CountAsync(r => r.QuoteId == existingQuote.Id && r.ReactionType == "like");
 
@@ -111,11 +107,12 @@ namespace MotivationQuotesAPI.Controllers
                 id = existingQuote.Id,
                 text = existingQuote.Text,
                 author = existingQuote.Author,
-                likes = likes,
-                dislikes = dislikes,
-                allSeen = allSeen
+                likes,
+                dislikes,
+                allSeen
             });
         }
+
 
         // Додати цитату до улюблених
         [HttpPost("favorites/add")]
@@ -158,20 +155,27 @@ namespace MotivationQuotesAPI.Controllers
         [HttpGet("favorites/list")]
         public async Task<IActionResult> GetFavorites([FromQuery] long userId)
         {
-            var favorites = await _dbContext.Favorites.Include(f => f.Quote).Where(f => f.UserId == userId).ToListAsync();
+            var favorites = await _dbContext.Favorites
+                .Include(f => f.Quote)
+                .Where(f => f.UserId == userId)
+                .ToListAsync();
+
+            if (favorites.Count == 0)
+                return Ok(new { count = 0, quotes = new List<object>() });
+
+            var result = favorites.Select(f => new
+            {
+                id = f.Quote.Id,
+                text = f.Quote.Text,
+                author = f.Quote.Author
+            });
 
             return Ok(new
             {
-                count = favorites.Count,
-                quotes = favorites.Select(f => new
-                {
-                    f.Quote.Id,
-                    f.Quote.Text,
-                    f.Quote.Author
-                })
+                count = result.Count(),
+                quotes = result
             });
         }
-
 
         // Видалити цитату з улюблених
         [HttpDelete("favorites/delete/{id}")]
