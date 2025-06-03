@@ -222,28 +222,19 @@ namespace MotivationQuotesAPI.Controllers
             return Ok(new { message = "Історія очищена." });
         }
 
-        private static byte[]? _cachedImage;
-        private static DateTime _lastFetched = DateTime.MinValue;
-
         [HttpGet("image")]
         public async Task<IActionResult> GetQuoteImage()
         {
-            if (_cachedImage != null && (DateTime.UtcNow - _lastFetched).TotalSeconds < 40)
-            {
-                return File(_cachedImage, "image/jpeg");
-            }
-
             using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync("https://zenquotes.io/api/image");
 
             if (!response.IsSuccessStatusCode)
                 return StatusCode((int)response.StatusCode, "Не вдалося отримати зображення.");
 
-            _cachedImage = await response.Content.ReadAsByteArrayAsync();
-            _lastFetched = DateTime.UtcNow;
-
+            var imageBytes = await response.Content.ReadAsByteArrayAsync();
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
-            return File(_cachedImage, contentType);
+
+            return File(imageBytes, contentType);
         }
 
 
